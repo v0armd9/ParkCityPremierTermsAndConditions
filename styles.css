@@ -1,0 +1,134 @@
+:root {
+  --accent-red: #B8002E;
+  --primary-text: #FFFFFF;
+  --body-text: #ABABAB;
+  --screen-background: #000000;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background-color: var(--screen-background);
+  color: var(--primary-text);
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+
+.landing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  background-image: linear-gradient(to bottom, var(--accent-red) 0%, var(--screen-background) 65%);
+  background-repeat: no-repeat;
+}
+
+.landing-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  width: 100%;
+  max-width: 360px;
+}
+
+.logo {
+  margin: 0;
+}
+
+.logo img {
+  display: block;
+  width: min(240px, 60vw);
+  height: auto;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 56px;
+  border-radius: 16px;
+  background-color: var(--accent-red);
+  color: var(--primary-text);
+  font-size: 17px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.button:hover {
+  filter: brightness(1.1);
+}
+
+.button:active {
+  opacity: 0.85;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--primary-text);
+  outline-offset: 3px;
+}
+
+.band {
+  padding: 32px 24px 44px;
+  background-image: linear-gradient(to bottom, var(--accent-red), var(--screen-background));
+  text-align: center;
+}
+
+.band-logo {
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.band-logo img {
+  display: block;
+  width: 96px;
+  height: auto;
+}
+
+.band h1 {
+  margin: 0;
+  font-size: clamp(32px, 8vw, 48px);
+  font-weight: 800;
+}
+
+.document {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 8px 24px 64px;
+  color: var(--body-text);
+  font-size: 17px;
+  line-height: 1.55;
+}
+
+.document h2 {
+  margin: 32px 0 8px;
+  color: var(--primary-text);
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.document a {
+  color: var(--primary-text);
+}
+
+.effective {
+  font-size: 15px;
+}
