@@ -132,3 +132,24 @@ body {
 .effective {
   font-size: 15px;
 }
+
+@media print {
+  body {
+    min-height: 0;
+  }
+
+  :root {
+    --primary-text: #000000;
+    --body-text: #000000;
+    --screen-background: #FFFFFF;
+  }
+
+  .band {
+    padding: 0 0 16px;
+    background-image: none;
+  }
+
+  .band-logo {
+    display: none;
+  }
+}
