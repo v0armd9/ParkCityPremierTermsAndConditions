@@ -2,6 +2,7 @@
   --accent-red: #B8002E;
   --primary-text: #FFFFFF;
   --body-text: #ABABAB;
+  --surface-gray: #252528;
   --screen-background: #000000;
   color-scheme: dark;
 }
@@ -125,6 +126,53 @@ body {
   font-weight: 600;
 }
 
+.document h3 {
+  margin: 24px 0 4px;
+  color: var(--primary-text);
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.document h2 + h3 {
+  margin-top: 12px;
+}
+
+.document strong,
+.document th {
+  color: var(--primary-text);
+  font-weight: 600;
+}
+
+.document ul {
+  margin: 8px 0 16px;
+  padding-left: 20px;
+}
+
+.document li + li {
+  margin-top: 8px;
+}
+
+.document table {
+  width: 100%;
+  margin: 12px 0 16px;
+  border-collapse: collapse;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.document th,
+.document td {
+  padding: 10px 12px 10px 0;
+  border-bottom: 1px solid var(--surface-gray);
+  text-align: left;
+  vertical-align: top;
+}
+
+.document th:last-child,
+.document td:last-child {
+  padding-right: 0;
+}
+
 .document a {
   color: var(--primary-text);
 }
@@ -141,6 +189,7 @@ body {
   :root {
     --primary-text: #000000;
     --body-text: #000000;
+    --surface-gray: #BBBBBB;
     --screen-background: #FFFFFF;
   }
 
