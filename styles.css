@@ -87,6 +87,58 @@ body {
   outline-offset: 3px;
 }
 
+.download {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.app-store-badge {
+  display: inline-block;
+  border-radius: 12px;
+}
+
+.app-store-badge img {
+  display: block;
+  width: min(246px, 70vw);
+  height: auto;
+  aspect-ratio: 3 / 1;
+  object-fit: contain;
+}
+
+.app-store-badge:focus-visible {
+  outline: 2px solid var(--primary-text);
+  outline-offset: 3px;
+}
+
+/* The QR code is for desktop visitors; on a phone the badge is one tap. */
+.qr {
+  display: none;
+  width: 160px;
+  height: 160px;
+  border-radius: 16px;
+}
+
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
+  .landing-content {
+    max-width: 460px;
+  }
+
+  .actions {
+    max-width: 360px;
+  }
+
+  .download {
+    flex-direction: row;
+    gap: 32px;
+  }
+
+  .qr {
+    display: block;
+  }
+}
+
 .band {
   padding: 32px 24px 44px;
   background-image: linear-gradient(to bottom, var(--accent-red), var(--screen-background));
