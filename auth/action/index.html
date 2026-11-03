@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#B8002E">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+  <title>Account | Park City Premier</title>
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .action-panel { max-width: 440px; }
+    .action-panel p { margin: 16px 0; }
+    .action-panel .button { margin-top: 24px; }
+    button.button {
+      width: 100%;
+      border: 0;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    button.button:disabled { opacity: 0.5; cursor: default; }
+    .field { display: block; margin-top: 16px; }
+    .field span {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--primary-text);
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .field input {
+      width: 100%;
+      height: 52px;
+      padding: 0 16px;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      background-color: var(--surface-gray);
+      color: var(--primary-text);
+      font: inherit;
+    }
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent-red);
+    }
+    .error { color: #FF6B81; }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="band">
+    <a class="band-logo" href="/"><img src="/logo.png" alt="Park City Premier home" width="96" height="96"></a>
+    <h1 id="title">One moment…</h1>
+  </header>
+  <main class="document action-panel">
+    <p id="message">Checking your link.</p>
+
+    <form id="reset-form" hidden novalidate>
+      <label class="field">
+        <span>New password</span>
+        <input id="new-password" type="password" autocomplete="new-password" minlength="6" required>
+      </label>
+      <label class="field">
+        <span>Confirm password</span>
+        <input id="confirm-password" type="password" autocomplete="new-password" minlength="6" required>
+      </label>
+      <p id="form-error" class="error" role="alert" hidden></p>
+      <button id="reset-submit" class="button" type="submit">Save password</button>
+    </form>
+
+    <button id="secondary" class="button" type="button" hidden></button>
+    <a id="continue" class="button" hidden>Continue</a>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+    import {
+      getAuth,
+      applyActionCode,
+      checkActionCode,
+      verifyPasswordResetCode,
+      confirmPasswordReset,
+      sendPasswordResetEmail
+    } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    const $ = (id) => document.getElementById(id);
+    const titleEl = $("title");
+    const messageEl = $("message");
+
+    const params = new URLSearchParams(window.location.search);
+    const mode = params.get("mode");
+    const oobCode = params.get("oobCode");
+    const apiKey = params.get("apiKey");
+    const continueUrl = params.get("continueUrl");
+    const lang = params.get("lang");
+
+    const ERRORS = {
+      "auth/expired-action-code": "This link has expired. Please request a new one from the Park City Premier app.",
+      "auth/invalid-action-code": "This link is invalid or has already been used. Please request a new one from the Park City Premier app.",
+      "auth/user-disabled": "This account has been disabled. Contact support@parkcitypremier.net for help.",
+      "auth/user-not-found": "We couldn't find this account. It may have been deleted.",
+      "auth/weak-password": "That password is too weak. Use at least 6 characters.",
+      "auth/network-request-failed": "Network error. Check your connection and try again.",
+      "auth/too-many-requests": "Too many attempts. Please wait a few minutes and try again."
+    };
+
+    function show(title, message) {
+      titleEl.textContent = title;
+      document.title = `${title} | Park City Premier`;
+      messageEl.textContent = message;
+    }
+
+    function fail(error) {
+      console.error(error);
+      show("Link not valid", ERRORS[error?.code] || "Something went wrong. Please request a new link from the Park City Premier app.");
+      $("reset-form").hidden = true;
+      $("secondary").hidden = true;
+    }
+
+    function showContinue() {
+      if (!continueUrl) return;
+      try {
+        const url = new URL(continueUrl);
+        if (url.protocol !== "https:" && url.protocol !== "http:") return;
+        const link = $("continue");
+        link.href = url.href;
+        link.hidden = false;
+      } catch { /* ignore malformed continueUrl */ }
+    }
+
+    async function handleVerifyEmail(auth) {
+      await applyActionCode(auth, oobCode);
+      show("Email verified", "Your email address is verified. You can return to the Park City Premier app and sign in.");
+      showContinue();
+    }
+
+    async function handleResetPassword(auth) {
+      const email = await verifyPasswordResetCode(auth, oobCode);
+      show("Reset password", `Choose a new password for ${email}.`);
+
+      const form = $("reset-form");
+      const pw = $("new-password");
+      const confirmPw = $("confirm-password");
+      const formError = $("form-error");
+      const submit = $("reset-submit");
+      form.hidden = false;
+      pw.focus();
+
+      const setFormError = (text) => {
+        formError.textContent = text;
+        formError.hidden = !text;
+      };
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        setFormError("");
+        if (pw.value.length < 6) return setFormError("Use at least 6 characters.");
+        if (pw.value !== confirmPw.value) return setFormError("Passwords don't match.");
+
+        submit.disabled = true;
+        try {
+          await confirmPasswordReset(auth, oobCode, pw.value);
+          form.hidden = true;
+          show("Password updated", "Your password has been changed. Return to the Park City Premier app and sign in with your new password.");
+          showContinue();
+        } catch (error) {
+          submit.disabled = false;
+          if (error?.code === "auth/weak-password") return setFormError(ERRORS[error.code]);
+          fail(error);
+        }
+      });
+    }
+
+    async function handleRecoverEmail(auth) {
+      const info = await checkActionCode(auth, oobCode);
+      const restoredEmail = info.data.email;
+      await applyActionCode(auth, oobCode);
+      show("Email restored", `Your sign-in email has been changed back to ${restoredEmail}. If you didn't request the change, reset your password now to secure your account.`);
+
+      const button = $("secondary");
+      button.textContent = "Send password reset email";
+      button.hidden = false;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        try {
+          await sendPasswordResetEmail(auth, restoredEmail);
+          button.hidden = true;
+          show("Check your inbox", `We sent a password reset link to ${restoredEmail}.`);
+        } catch (error) {
+          fail(error);
+        }
+      }, { once: true });
+    }
+
+    async function handleVerifyAndChangeEmail(auth) {
+      const info = await checkActionCode(auth, oobCode);
+      await applyActionCode(auth, oobCode);
+      show("Email updated", `Your sign-in email is now ${info.data.email}. Use it the next time you sign in to the Park City Premier app.`);
+      showContinue();
+    }
+
+    async function handleRevertSecondFactor(auth) {
+      await checkActionCode(auth, oobCode);
+      await applyActionCode(auth, oobCode);
+      show("Second factor removed", "The second factor was removed from your account. If you didn't make this change, reset your password from the Park City Premier app.");
+    }
+
+    const HANDLERS = {
+      verifyEmail: handleVerifyEmail,
+      resetPassword: handleResetPassword,
+      recoverEmail: handleRecoverEmail,
+      verifyAndChangeEmail: handleVerifyAndChangeEmail,
+      revertSecondFactorAddition: handleRevertSecondFactor
+    };
+
+    (async () => {
+      const handler = HANDLERS[mode];
+      if (!handler || !oobCode || !apiKey) {
+        show("Link not valid", "This link is incomplete. Please open it directly from the email we sent you.");
+        return;
+      }
+      try {
+        const auth = getAuth(initializeApp({ apiKey }));
+        if (lang) auth.languageCode = lang;
+        await handler(auth);
+      } catch (error) {
+        fail(error);
+      }
+    })();
+  </script>
+</body>
+</html>
